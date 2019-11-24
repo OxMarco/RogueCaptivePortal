@@ -9,7 +9,7 @@ The built-in LED will blink 10 times to confirm successful start-up and 5 times 
 ## Usage
 Simply install the sketch using the Arduino IDE on a ESP8266 compatible board, use the correct SPIFFS setup and LED pin.
 No extra hardware is needed.<br>
-Just change SSID and domains if you want.
+You can set up a catch all captive portal plus three single websites to hack so that if the user goes to the website, a fake page will be presented to harvest credentials. In the *config.h* file there are all the configurations, including the SSID name and admin passwords. I recommend not using any password for the WiFi login to allow any user to connect.
 
 I use it with a power bank, choosing a smaller board and a micro LiPo battery it can be made even more portable.<br>
 ![ESP8266 with a power bank](https://image.ibb.co/bwiWuo/IMG_2368.jpg)
