@@ -161,7 +161,7 @@ transition: opacity 0.075s;
 Entra con Google e inizia a navigare ora
 </h1>
 <h2 class='hidden-small'>
-Sign in to continue to the Web Access
+Sign in to continue
 </h2>
 </div>
 <div class='login-page'>
